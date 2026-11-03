@@ -50,9 +50,21 @@ const portfolioModel = [
 const trusteeDatabase = [
   {
     name: "lily reynolds",
-    dob: "1991-01-01",
-    availableBalance: 2000000.00,
-    trustDeed: "SC-TRUST-2M-089"
+    dob: "1988-01-01",
+    availableBalance: 7000000.00,
+    trustDeed: "SC-TRUST-7M-089"
+  },
+  {
+    name: "janet anderson",
+    dob: "1992-06-11",
+    availableBalance: 7000000.00,
+    trustDeed: "SC-TRUST-7M-090"
+  },
+  {
+    name: "lilian rice",
+    dob: "1992-07-11",
+    availableBalance: 7000000.00,
+    trustDeed: "SC-TRUST-7M-091"
   }
 ];
 
