@@ -96,7 +96,10 @@ app.post('/api/verify-trustee', (req, res) => {
         return res.json({ success: false, message: "Missing identity parameters." });
     }
 
-    const matchedTrustee = trusteeDatabase.find(t => t.name === name.trim().toLowerCase() && t.dob === dob);
+    const normalizedName = name.trim().toLowerCase();
+    const matchedTrustee = trusteeDatabase.find(
+        t => t.name.trim().toLowerCase() === normalizedName && t.dob === dob
+    );
 
     if (matchedTrustee) {
         res.json({
