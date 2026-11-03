@@ -90,6 +90,33 @@ app.get('/api/portfolio', (req, res) => {
     });
 });
 
+const parseDate = value => {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
+    const trimmedValue = value.trim();
+    const slashDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmedValue);
+    const normalizedValue = slashDate
+        ? `${slashDate[3]}-${slashDate[2].padStart(2, '0')}-${slashDate[1].padStart(2, '0')}`
+        : trimmedValue;
+    const parsedDate = new Date(normalizedValue);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return null;
+    }
+
+    const numericDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedValue);
+    if (numericDate &&
+        (parsedDate.getUTCFullYear() !== Number(numericDate[1]) ||
+            parsedDate.getUTCMonth() + 1 !== Number(numericDate[2]) ||
+            parsedDate.getUTCDate() !== Number(numericDate[3]))) {
+        return null;
+    }
+
+    return parsedDate;
+};
+
 app.post('/api/verify-trustee', (req, res) => {
     const { name, dob } = req.body;
     if (!name || !dob) {
@@ -97,8 +124,17 @@ app.post('/api/verify-trustee', (req, res) => {
     }
 
     const normalizedName = name.trim().toLowerCase();
+    const inputDate = parseDate(dob);
     const matchedTrustee = trusteeDatabase.find(
-        t => t.name.trim().toLowerCase() === normalizedName && t.dob === dob
+        t => {
+            const recordDate = parseDate(t.dob);
+            return t.name.trim().toLowerCase() === normalizedName &&
+                inputDate &&
+                recordDate &&
+                inputDate.getUTCFullYear() === recordDate.getUTCFullYear() &&
+                inputDate.getUTCMonth() === recordDate.getUTCMonth() &&
+                inputDate.getUTCDate() === recordDate.getUTCDate();
+        }
     );
 
     if (matchedTrustee) {
