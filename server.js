@@ -92,29 +92,41 @@ app.get('/api/portfolio', (req, res) => {
 
 const parseDate = value => {
     if (typeof value !== 'string') {
-        return null;
+        return [];
     }
 
     const trimmedValue = value.trim();
     const slashDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmedValue);
-    const normalizedValue = slashDate
-        ? `${slashDate[3]}-${slashDate[2].padStart(2, '0')}-${slashDate[1].padStart(2, '0')}`
-        : trimmedValue;
-    const parsedDate = new Date(normalizedValue);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-        return null;
+    if (slashDate) {
+        const [, first, second, year] = slashDate;
+        return [[second, first], [first, second]]
+            .map(([month, day]) => {
+                const normalizedValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                const parsedDate = new Date(normalizedValue);
+                return parsedDate.getUTCFullYear() === Number(year) &&
+                    parsedDate.getUTCMonth() + 1 === Number(month) &&
+                    parsedDate.getUTCDate() === Number(day)
+                    ? parsedDate
+                    : null;
+            })
+            .filter(Boolean);
     }
 
-    const numericDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedValue);
+    const parsedDate = new Date(trimmedValue);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return [];
+    }
+
+    const numericDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmedValue);
     if (numericDate &&
         (parsedDate.getUTCFullYear() !== Number(numericDate[1]) ||
             parsedDate.getUTCMonth() + 1 !== Number(numericDate[2]) ||
             parsedDate.getUTCDate() !== Number(numericDate[3]))) {
-        return null;
+        return [];
     }
 
-    return parsedDate;
+    return [parsedDate];
 };
 
 app.post('/api/verify-trustee', (req, res) => {
@@ -124,16 +136,18 @@ app.post('/api/verify-trustee', (req, res) => {
     }
 
     const normalizedName = name.trim().toLowerCase();
-    const inputDate = parseDate(dob);
+    const inputDates = parseDate(dob);
     const matchedTrustee = trusteeDatabase.find(
         t => {
-            const recordDate = parseDate(t.dob);
+            const recordDates = parseDate(t.dob);
             return t.name.trim().toLowerCase() === normalizedName &&
-                inputDate &&
-                recordDate &&
-                inputDate.getUTCFullYear() === recordDate.getUTCFullYear() &&
-                inputDate.getUTCMonth() === recordDate.getUTCMonth() &&
-                inputDate.getUTCDate() === recordDate.getUTCDate();
+                inputDates.some(inputDate =>
+                    recordDates.some(recordDate =>
+                        inputDate.getUTCFullYear() === recordDate.getUTCFullYear() &&
+                        inputDate.getUTCMonth() === recordDate.getUTCMonth() &&
+                        inputDate.getUTCDate() === recordDate.getUTCDate()
+                    )
+                );
         }
     );
 
