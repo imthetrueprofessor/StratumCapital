@@ -96,37 +96,72 @@ const parseDate = value => {
     }
 
     const trimmedValue = value.trim();
-    const slashDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmedValue);
-    if (slashDate) {
-        const [, first, second, year] = slashDate;
-        return [[second, first], [first, second]]
-            .map(([month, day]) => {
-                const normalizedValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                const parsedDate = new Date(normalizedValue);
-                return parsedDate.getUTCFullYear() === Number(year) &&
-                    parsedDate.getUTCMonth() + 1 === Number(month) &&
-                    parsedDate.getUTCDate() === Number(day)
-                    ? parsedDate
-                    : null;
-            })
-            .filter(Boolean);
+    const createDate = (year, month, day) => {
+        year = Number(year);
+        month = Number(month);
+        day = Number(day);
+
+        if (year < 1 || year > 9999 || month < 1 || month > 12) {
+            return null;
+        }
+
+        const daysInMonth = [
+            31,
+            year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28,
+            31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        ][month - 1];
+
+        return day >= 1 && day <= daysInMonth
+            ? { year, month, day }
+            : null;
+    };
+    const isoDate = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(trimmedValue);
+    if (isoDate) {
+        const date = createDate(isoDate[1], isoDate[2], isoDate[3]);
+        return date ? [date] : [];
     }
 
-    const parsedDate = new Date(trimmedValue);
+    const monthNames = {
+        jan: 1, january: 1,
+        feb: 2, february: 2,
+        mar: 3, march: 3,
+        apr: 4, april: 4,
+        may: 5,
+        jun: 6, june: 6,
+        jul: 7, july: 7,
+        aug: 8, august: 8,
+        sep: 9, sept: 9, september: 9,
+        oct: 10, october: 10,
+        nov: 11, november: 11,
+        dec: 12, december: 12
+    };
+    const namedDate = /^(?:(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)\.?,?|([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?)\s+(\d{4})$/i.exec(trimmedValue);
+    if (namedDate) {
+        const day = namedDate[1] || namedDate[4];
+        const monthName = (namedDate[2] || namedDate[3]).toLowerCase();
+        const month = monthNames[monthName];
+        const date = month && createDate(namedDate[5], month, day);
+        return date ? [date] : [];
+    }
 
-    if (Number.isNaN(parsedDate.getTime())) {
+    const numericDate = /^(\d{1,2})[/. -](\d{1,2})[/. -](\d{4})$/.exec(trimmedValue);
+    if (!numericDate) {
         return [];
     }
 
-    const numericDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmedValue);
-    if (numericDate &&
-        (parsedDate.getUTCFullYear() !== Number(numericDate[1]) ||
-            parsedDate.getUTCMonth() + 1 !== Number(numericDate[2]) ||
-            parsedDate.getUTCDate() !== Number(numericDate[3]))) {
-        return [];
-    }
+    const [, first, second, year] = numericDate;
+    const dates = [
+        createDate(year, second, first),
+        createDate(year, first, second)
+    ].filter(Boolean);
 
-    return [parsedDate];
+    return dates.filter((date, index) =>
+        dates.findIndex(candidate =>
+            candidate.year === date.year &&
+            candidate.month === date.month &&
+            candidate.day === date.day
+        ) === index
+    );
 };
 
 app.post('/api/verify-trustee', (req, res) => {
@@ -143,9 +178,9 @@ app.post('/api/verify-trustee', (req, res) => {
             return t.name.trim().toLowerCase() === normalizedName &&
                 inputDates.some(inputDate =>
                     recordDates.some(recordDate =>
-                        inputDate.getUTCFullYear() === recordDate.getUTCFullYear() &&
-                        inputDate.getUTCMonth() === recordDate.getUTCMonth() &&
-                        inputDate.getUTCDate() === recordDate.getUTCDate()
+                        inputDate.year === recordDate.year &&
+                        inputDate.month === recordDate.month &&
+                        inputDate.day === recordDate.day
                     )
                 );
         }
