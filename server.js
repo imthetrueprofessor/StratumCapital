@@ -115,7 +115,10 @@ const parseDate = value => {
             return null;
         }
 
-        return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const date = new Date(0);
+        date.setUTCHours(0, 0, 0, 0);
+        date.setUTCFullYear(year, month - 1, day);
+        return date;
     };
     const isoDate = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(trimmedValue);
     if (isoDate) {
@@ -156,7 +159,9 @@ const parseDate = value => {
         createDate(year, second, first),
         createDate(year, first, second)
     ].filter((date, index, candidates) =>
-        date && candidates.indexOf(date) === index
+        date && candidates.findIndex(candidate =>
+            candidate && candidate.getTime() === date.getTime()
+        ) === index
     );
 
     return dates;
@@ -174,7 +179,9 @@ app.post('/api/verify-trustee', (req, res) => {
         t => {
             const recordDates = parseDate(t.dob);
             return t.name.trim().toLowerCase() === normalizedName &&
-                inputDates.some(inputDate => recordDates.includes(inputDate));
+                inputDates.some(inputDate =>
+                    recordDates.some(recordDate => inputDate.getTime() === recordDate.getTime())
+                );
         }
     );
 
