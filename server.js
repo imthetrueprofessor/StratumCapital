@@ -221,6 +221,6 @@ app.post('/api/verify-seed', (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`StratumCapital running at http://localhost:${PORT}`);
 });
