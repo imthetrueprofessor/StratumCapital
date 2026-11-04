@@ -56,7 +56,7 @@ const trusteeDatabase = [
   },
   {
     name: "janet anderson",
-    dob: "1992-06-11",
+    dob: "1992-11-06",
     availableBalance: 7000000.00,
     trustDeed: "SC-TRUST-7M-090"
   },
@@ -126,6 +126,7 @@ const parseDate = value => {
         date.setUTCFullYear(year, month - 1, day);
         return date;
     };
+
     const isoDate = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(trimmedValue);
     if (isoDate) {
         const date = createDate(isoDate[1], isoDate[2], isoDate[3]);
@@ -146,6 +147,7 @@ const parseDate = value => {
         nov: '11', november: '11',
         dec: '12', december: '12'
     };
+
     const namedDate = /^(?:(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)\.?,?|([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?)\s+(\d{4})$/i.exec(trimmedValue);
     if (namedDate) {
         const day = (namedDate[1] || namedDate[4]).padStart(2, '0');
