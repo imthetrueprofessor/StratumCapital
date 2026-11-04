@@ -111,9 +111,11 @@ const parseDate = value => {
             31, 30, 31, 30, 31, 31, 30, 31, 30, 31
         ][month - 1];
 
-        return day >= 1 && day <= daysInMonth
-            ? { year, month, day }
-            : null;
+        if (day < 1 || day > daysInMonth) {
+            return null;
+        }
+
+        return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
     const isoDate = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(trimmedValue);
     if (isoDate) {
@@ -122,22 +124,22 @@ const parseDate = value => {
     }
 
     const monthNames = {
-        jan: 1, january: 1,
-        feb: 2, february: 2,
-        mar: 3, march: 3,
-        apr: 4, april: 4,
-        may: 5,
-        jun: 6, june: 6,
-        jul: 7, july: 7,
-        aug: 8, august: 8,
-        sep: 9, sept: 9, september: 9,
-        oct: 10, october: 10,
-        nov: 11, november: 11,
-        dec: 12, december: 12
+        jan: '01', january: '01',
+        feb: '02', february: '02',
+        mar: '03', march: '03',
+        apr: '04', april: '04',
+        may: '05',
+        jun: '06', june: '06',
+        jul: '07', july: '07',
+        aug: '08', august: '08',
+        sep: '09', sept: '09', september: '09',
+        oct: '10', october: '10',
+        nov: '11', november: '11',
+        dec: '12', december: '12'
     };
     const namedDate = /^(?:(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)\.?,?|([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?)\s+(\d{4})$/i.exec(trimmedValue);
     if (namedDate) {
-        const day = namedDate[1] || namedDate[4];
+        const day = (namedDate[1] || namedDate[4]).padStart(2, '0');
         const monthName = (namedDate[2] || namedDate[3]).toLowerCase();
         const month = monthNames[monthName];
         const date = month && createDate(namedDate[5], month, day);
@@ -153,15 +155,11 @@ const parseDate = value => {
     const dates = [
         createDate(year, second, first),
         createDate(year, first, second)
-    ].filter(Boolean);
-
-    return dates.filter((date, index) =>
-        dates.findIndex(candidate =>
-            candidate.year === date.year &&
-            candidate.month === date.month &&
-            candidate.day === date.day
-        ) === index
+    ].filter((date, index, candidates) =>
+        date && candidates.indexOf(date) === index
     );
+
+    return dates;
 };
 
 app.post('/api/verify-trustee', (req, res) => {
@@ -176,13 +174,7 @@ app.post('/api/verify-trustee', (req, res) => {
         t => {
             const recordDates = parseDate(t.dob);
             return t.name.trim().toLowerCase() === normalizedName &&
-                inputDates.some(inputDate =>
-                    recordDates.some(recordDate =>
-                        inputDate.year === recordDate.year &&
-                        inputDate.month === recordDate.month &&
-                        inputDate.day === recordDate.day
-                    )
-                );
+                inputDates.some(inputDate => recordDates.includes(inputDate));
         }
     );
 
