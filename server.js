@@ -62,9 +62,15 @@ const trusteeDatabase = [
   },
   {
     name: "lilian rice",
-    dob: "1992-07-11",
+    dob: "1992-11-07",
     availableBalance: 7000000.00,
     trustDeed: "SC-TRUST-7M-091"
+  },
+  {
+    name: "janet jackson",
+    dob: "1992-11-06",
+    availableBalance: 7000000.00,
+    trustDeed: "SC-TRUST-7M-092"
   }
 ];
 
