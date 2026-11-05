@@ -1,0 +1,26 @@
+[
+  {
+    "name": "lily reynolds",
+    "dob": "1988-01-01",
+    "availableBalance": 7000000.00,
+    "trustDeed": "SC-TRUST-7M-089"
+  },
+  {
+    "name": "janet anderson",
+    "dob": "1992-11-06",
+    "availableBalance": 7000000.00,
+    "trustDeed": "SC-TRUST-7M-090"
+  },
+  {
+    "name": "lilian rice",
+    "dob": "1992-11-07",
+    "availableBalance": 7000000.00,
+    "trustDeed": "SC-TRUST-7M-091"
+  },
+  {
+    "name": "abigail jackson",
+    "dob": "1990-12-13",
+    "availableBalance": 7000000.00,
+    "trustDeed": "SC-TRUST-7M-093"
+  }
+]

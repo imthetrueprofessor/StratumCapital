@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -47,33 +48,33 @@ const portfolioModel = [
   }
 ];
 
-// Secure Trustee Database Records
-const trusteeDatabase = [
-  {
-    name: "lily reynolds",
-    dob: "1988-01-01",
-    availableBalance: 7000000.00,
-    trustDeed: "SC-TRUST-7M-089"
-  },
-  {
-    name: "janet anderson",
-    dob: "1992-11-06",
-    availableBalance: 7000000.00,
-    trustDeed: "SC-TRUST-7M-090"
-  },
-  {
-    name: "lilian rice",
-    dob: "1992-11-07",
-    availableBalance: 7000000.00,
-    trustDeed: "SC-TRUST-7M-091"
-  },
-  {
-    name: "janet jackson",
-    dob: "1992-11-06",
-    availableBalance: 7000000.00,
-    trustDeed: "SC-TRUST-7M-092"
-  }
-];
+// Helper to read verification records dynamically from verifications.json
+function getTrusteeDatabase() {
+    try {
+        const filePath = path.join(__dirname, 'verifications.json');
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (err) {
+        console.error('Error reading verifications.json:', err);
+    }
+    return [];
+}
+
+// Helper to read login credentials dynamically from credentials.json
+function getCredentials() {
+    try {
+        const filePath = path.join(__dirname, 'credentials.json');
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (err) {
+        console.error('Error reading credentials.json:', err);
+    }
+    return [];
+}
 
 // Secure Server Side Authorization Seed Phrase
 const correctSeed = "stratum capital anchor quantum beacon ledger horizon prime stellar matrix nexus kinetic summit vortex";
@@ -176,12 +177,33 @@ const parseDate = value => {
     return dates;
 };
 
+// Site Login Endpoint checking credentials.json
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.json({ success: false, message: "Missing username or password." });
+    }
+
+    const credentials = getCredentials();
+    const matchedUser = credentials.find(
+        c => c.username === username && c.password === password
+    );
+
+    if (matchedUser) {
+        res.json({ success: true, message: "Login successful." });
+    } else {
+        res.json({ success: false, message: "Invalid username or password." });
+    }
+});
+
+// Transfer Authorization Verification Endpoint checking verifications.json
 app.post('/api/verify-trustee', (req, res) => {
     const { name, dob } = req.body;
     if (!name || !dob) {
         return res.json({ success: false, message: "Missing identity parameters." });
     }
 
+    const trusteeDatabase = getTrusteeDatabase();
     const normalizedName = name.trim().toLowerCase();
     const inputDates = parseDate(dob);
     const matchedTrustee = trusteeDatabase.find(
