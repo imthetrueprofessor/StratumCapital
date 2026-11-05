@@ -517,5 +517,54 @@
 
         fetchPortfolio();
     </script>
+
+    <div id="login-gate" style="position:fixed;inset:0;z-index:99999;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:1rem;">
+        <form id="login-form" style="background:#fff;width:100%;max-width:380px;padding:2rem;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.4);font-family:inherit;">
+            <h2 style="font-size:1.4rem;font-weight:700;margin:0 0 .25rem;">Secure Login</h2>
+            <p style="margin:0 0 1.25rem;color:#64748b;font-size:.9rem;">Sign in to access the dashboard.</p>
+            <label for="login-username" style="font-size:.85rem;font-weight:600;">Username</label>
+            <input id="login-username" type="text" autocomplete="username" required style="display:block;width:100%;margin:.25rem 0 1rem;padding:.6rem .75rem;border:1px solid #cbd5e1;border-radius:8px;">
+            <label for="login-password" style="font-size:.85rem;font-weight:600;">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" required style="display:block;width:100%;margin:.25rem 0 1rem;padding:.6rem .75rem;border:1px solid #cbd5e1;border-radius:8px;">
+            <div id="login-error" role="alert" style="display:none;margin-bottom:1rem;padding:.6rem .75rem;border-radius:8px;background:#fef2f2;color:#b91c1c;font-size:.85rem;"></div>
+            <button id="login-submit" type="submit" style="width:100%;padding:.7rem;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;cursor:pointer;">Log in</button>
+        </form>
+    </div>
+    <script>
+    (function () {
+        var gate = document.getElementById('login-gate');
+        var form = document.getElementById('login-form');
+        var err = document.getElementById('login-error');
+        var btn = document.getElementById('login-submit');
+        document.body.style.overflow = 'hidden';
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            err.style.display = 'none';
+            btn.disabled = true;
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('login-username').value,
+                    password: document.getElementById('login-password').value
+                })
+            }).then(function (r) { return r.json(); }).then(function (d) {
+                if (d.success) {
+                    gate.style.display = 'none';
+                    document.body.style.overflow = '';
+                    document.getElementById('login-password').value = '';
+                } else {
+                    // Includes "Account locked for 5 minutes" lockout messages from the server
+                    err.textContent = d.message || 'Login failed.';
+                    err.style.display = 'block';
+                    document.getElementById('login-password').value = '';
+                }
+            }).catch(function () {
+                err.textContent = 'Unable to reach the server. Try again.';
+                err.style.display = 'block';
+            }).finally(function () { btn.disabled = false; });
+        });
+    })();
+    </script>
 </body>
 </html>
