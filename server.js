@@ -48,10 +48,18 @@ const portfolioModel = [
   }
 ];
 
-// In-memory trackers for login rate limiting (lockout after 1 failed attempt for 5 minutes)
+// In-memory trackers for login rate limiting.
+// Failures accumulate per username: the 1st failure locks for 30 seconds,
+// the 5th failure locks for 3 minutes. A success or an expired 3-minute lockout resets the count.
 const loginAttempts = {};
-const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-const MAX_ATTEMPTS = 1;
+const SHORT_LOCKOUT = 30 * 1000;
+const LONG_LOCKOUT = 3 * 60 * 1000;
+const LONG_LOCKOUT_THRESHOLD = 5;
+
+const formatWait = ms => {
+    const secs = Math.ceil(ms / 1000);
+    return secs >= 60 ? `${Math.ceil(secs / 60)} minute(s)` : `${secs} second(s)`;
+};
 
 // Helper to read verification records dynamically from verifications.json
 function getTrusteeDatabase() {
@@ -182,7 +190,7 @@ const parseDate = value => {
     return dates;
 };
 
-// Site Login Endpoint with 1-attempt limit and 5-minute lockout timeout checking credentials.json
+// Site Login Endpoint: 30s lockout after 1 failure, 3 min after 5 failures, checking credentials.json
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -192,15 +200,16 @@ app.post('/api/login', (req, res) => {
     const trackerKey = username.trim().toLowerCase();
     const now = Date.now();
 
-    if (loginAttempts[trackerKey]) {
-        const record = loginAttempts[trackerKey];
-        if (record.lockoutUntil && now < record.lockoutUntil) {
-            const remainingMinutes = Math.ceil((record.lockoutUntil - now) / 60000);
+    const existing = loginAttempts[trackerKey];
+    if (existing && existing.lockoutUntil) {
+        if (now < existing.lockoutUntil) {
             return res.json({
                 success: false,
-                message: `Too many failed attempts. Account locked. Try again in ${remainingMinutes} minute(s).`
+                message: `Too many failed attempts. Account locked. Try again in ${formatWait(existing.lockoutUntil - now)}.`
             });
-        } else if (record.lockoutUntil && now >= record.lockoutUntil) {
+        }
+        // Lockout over: a finished long lockout resets the count; a short one keeps counting.
+        if (existing.count >= LONG_LOCKOUT_THRESHOLD) {
             delete loginAttempts[trackerKey];
         }
     }
@@ -214,13 +223,12 @@ app.post('/api/login', (req, res) => {
         delete loginAttempts[trackerKey]; // Reset on successful login
         res.json({ success: true, message: "Login successful." });
     } else {
-        loginAttempts[trackerKey] = {
-            count: 1,
-            lockoutUntil: now + LOCKOUT_DURATION
-        };
+        const count = ((loginAttempts[trackerKey] || {}).count || 0) + 1;
+        const duration = count >= LONG_LOCKOUT_THRESHOLD ? LONG_LOCKOUT : SHORT_LOCKOUT;
+        loginAttempts[trackerKey] = { count, lockoutUntil: now + duration };
         return res.json({
             success: false,
-            message: "Invalid credentials. Account locked for 5 minutes."
+            message: `Invalid credentials. Account locked for ${formatWait(duration)}.`
         });
     }
 });

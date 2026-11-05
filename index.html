@@ -129,7 +129,12 @@
             <h2>StratumCapital Terminal</h2>
             <form id="login-form">
                 <input type="text" id="username" placeholder="Username" required autocomplete="username">
-                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <div style="position:relative;">
+                    <input type="password" id="password" placeholder="Password" required autocomplete="current-password" style="padding-right:2.75rem;">
+                    <button type="button" id="toggle-password" aria-label="Show password" style="position:absolute;top:0;right:0;width:2.75rem;height:calc(100% - 1rem);background:transparent;display:flex;align-items:center;justify-content:center;color:#9ca3af;">
+                        <i data-lucide="eye" id="toggle-password-icon" style="width:20px;height:20px;"></i>
+                    </button>
+                </div>
                 <button type="submit">Authenticate Session</button>
                 <div id="login-error"></div>
             </form>
@@ -364,6 +369,17 @@
         let currentPortfolioData = null;
         let initialPrices = [];
         let verifiedUserBalance = 0;
+
+        // Show/hide password toggle
+        document.getElementById('toggle-password').addEventListener('click', () => {
+            const input = document.getElementById('password');
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            const btn = document.getElementById('toggle-password');
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            btn.innerHTML = '<i data-lucide="' + (show ? 'eye-off' : 'eye') + '" style="width:20px;height:20px;"></i>';
+            lucide.createIcons();
+        });
 
         // Login Handler Script
         document.getElementById('login-form').addEventListener('submit', async (e) => {
