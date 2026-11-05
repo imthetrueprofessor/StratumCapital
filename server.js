@@ -48,6 +48,11 @@ const portfolioModel = [
   }
 ];
 
+// In-memory trackers for login rate limiting (lockout after 1 failed attempt for 5 minutes)
+const loginAttempts = {};
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const MAX_ATTEMPTS = 1;
+
 // Helper to read verification records dynamically from verifications.json
 function getTrusteeDatabase() {
     try {
@@ -177,11 +182,27 @@ const parseDate = value => {
     return dates;
 };
 
-// Site Login Endpoint checking credentials.json
+// Site Login Endpoint with 1-attempt limit and 5-minute lockout timeout checking credentials.json
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.json({ success: false, message: "Missing username or password." });
+    }
+
+    const trackerKey = username.trim().toLowerCase();
+    const now = Date.now();
+
+    if (loginAttempts[trackerKey]) {
+        const record = loginAttempts[trackerKey];
+        if (record.lockoutUntil && now < record.lockoutUntil) {
+            const remainingMinutes = Math.ceil((record.lockoutUntil - now) / 60000);
+            return res.json({
+                success: false,
+                message: `Too many failed attempts. Account locked. Try again in ${remainingMinutes} minute(s).`
+            });
+        } else if (record.lockoutUntil && now >= record.lockoutUntil) {
+            delete loginAttempts[trackerKey];
+        }
     }
 
     const credentials = getCredentials();
@@ -190,9 +211,17 @@ app.post('/api/login', (req, res) => {
     );
 
     if (matchedUser) {
+        delete loginAttempts[trackerKey]; // Reset on successful login
         res.json({ success: true, message: "Login successful." });
     } else {
-        res.json({ success: false, message: "Invalid username or password." });
+        loginAttempts[trackerKey] = {
+            count: 1,
+            lockoutUntil: now + LOCKOUT_DURATION
+        };
+        return res.json({
+            success: false,
+            message: "Invalid credentials. Account locked for 5 minutes."
+        });
     }
 });
 
