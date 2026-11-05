@@ -639,7 +639,14 @@
                 statusDiv.classList.add('hidden');
                 if (result.success) {
                     verifiedUserBalance = result.balance;
-                    document.getElementById('modal-transfer-balance').textContent = `$${verifiedUserBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    
+                    // Format balance cleanly with proper financial commas
+                    const parsedBalance = parseFloat(result.balance);
+                    const formattedBalance = !isNaN(parsedBalance) 
+                        ? '$' + parsedBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : '$' + result.balance;
+
+                    document.getElementById('modal-transfer-balance').textContent = formattedBalance;
                     document.getElementById('trust-deed-id').textContent = `Trust Deed #${result.trustDeed}`;
                     
                     document.getElementById('verified-balance-box').classList.remove('hidden');
