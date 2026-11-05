@@ -49,8 +49,6 @@ const portfolioModel = [
 ];
 
 // In-memory trackers for login rate limiting.
-// Failures accumulate per username: the 1st failure locks for 30 seconds,
-// the 5th failure locks for 3 minutes. A success or an expired 3-minute lockout resets the count.
 const loginAttempts = {};
 const SHORT_LOCKOUT = 30 * 1000;
 const LONG_LOCKOUT = 3 * 60 * 1000;
@@ -72,7 +70,7 @@ function getTrusteeDatabase() {
     } catch (err) {
         console.error('Error reading verifications.json:', err);
     }
-    return [];
+    return {};
 }
 
 // Helper to read login credentials dynamically from credentials.json
@@ -86,7 +84,7 @@ function getCredentials() {
     } catch (err) {
         console.error('Error reading credentials.json:', err);
     }
-    return [];
+    return {};
 }
 
 // Secure Server Side Authorization Seed Phrase
@@ -190,7 +188,7 @@ const parseDate = value => {
     return dates;
 };
 
-// Site Login Endpoint: 30s lockout after 1 failure, 3 min after 5 failures, checking credentials.json
+// Site Login Endpoint with Case-Insensitive Username Support
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -208,20 +206,21 @@ app.post('/api/login', (req, res) => {
                 message: `Too many failed attempts. Account locked. Try again in ${formatWait(existing.lockoutUntil - now)}.`
             });
         }
-        // Lockout over: a finished long lockout resets the count; a short one keeps counting.
         if (existing.count >= LONG_LOCKOUT_THRESHOLD) {
             delete loginAttempts[trackerKey];
         }
     }
 
     const credentials = getCredentials();
-    const matchedUser = credentials.find(
-        c => c.username === username && c.password === password
+    
+    // Case-insensitive lookup for object key in credentials.json
+    const matchedKey = Object.keys(credentials).find(
+        key => key.toLowerCase() === trackerKey
     );
 
-    if (matchedUser) {
+    if (matchedKey && credentials[matchedKey] === password) {
         delete loginAttempts[trackerKey]; // Reset on successful login
-        res.json({ success: true, message: "Login successful." });
+        res.json({ success: true, message: "Login successful.", username: matchedKey });
     } else {
         const count = ((loginAttempts[trackerKey] || {}).count || 0) + 1;
         const duration = count >= LONG_LOCKOUT_THRESHOLD ? LONG_LOCKOUT : SHORT_LOCKOUT;
@@ -243,10 +242,16 @@ app.post('/api/verify-trustee', (req, res) => {
     const trusteeDatabase = getTrusteeDatabase();
     const normalizedName = name.trim().toLowerCase();
     const inputDates = parseDate(dob);
-    const matchedTrustee = trusteeDatabase.find(
+
+    // Support both Array and Object formats for verifications.json
+    const trusteeRecords = Array.isArray(trusteeDatabase) 
+        ? trusteeDatabase 
+        : Object.values(trusteeDatabase);
+
+    const matchedTrustee = trusteeRecords.find(
         t => {
             const recordDates = parseDate(t.dob);
-            return t.name.trim().toLowerCase() === normalizedName &&
+            return t.name && t.name.trim().toLowerCase() === normalizedName &&
                 inputDates.some(inputDate =>
                     recordDates.some(recordDate => inputDate.getTime() === recordDate.getTime())
                 );
