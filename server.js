@@ -2,9 +2,10 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 8080;
 
 app.use(express.json());
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -221,6 +222,15 @@ app.post('/api/verify-seed', (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`StratumCapital running at http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`StratumCapital listening on 0.0.0.0:${PORT}`);
 });
+
+// Graceful shutdown: Railway sends SIGTERM on redeploy/stop.
+const shutdown = signal => {
+    console.log(`${signal} received, shutting down`);
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 8000).unref();
+};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
