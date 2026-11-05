@@ -640,11 +640,11 @@
                 if (result.success) {
                     verifiedUserBalance = result.balance;
                     
-                    // Format balance cleanly with proper financial commas
-                    const parsedBalance = parseFloat(result.balance);
-                    const formattedBalance = !isNaN(parsedBalance) 
-                        ? '$' + parsedBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : '$' + result.balance;
+                    // Force strict regex comma formatting for mobile compatibility
+                    const numStr = parseFloat(result.balance).toFixed(2);
+                    const parts = numStr.split('.');
+                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    const formattedBalance = '$' + parts.join('.');
 
                     document.getElementById('modal-transfer-balance').textContent = formattedBalance;
                     document.getElementById('trust-deed-id').textContent = `Trust Deed #${result.trustDeed}`;
