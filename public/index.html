@@ -49,6 +49,65 @@
             overflow-wrap: anywhere;
         }
 
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b0f19;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .login-card {
+            background: #111827;
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .login-card h2 {
+            color: #f9fafb;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .login-card button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .login-card button:hover {
+            background: #1d4ed8;
+        }
+        #login-error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            text-align: center;
+        }
+
         @media (max-width: 640px) {
             #withdraw-modal input,
             #withdraw-modal textarea {
@@ -63,6 +122,20 @@
     </style>
 </head>
 <body class="bg-bgLight text-textMain font-sans antialiased overflow-x-hidden p-3 sm:p-4 md:p-8">
+
+    <!-- Secure Login Overlay Gate -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2>StratumCapital Terminal</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Username" required autocomplete="username">
+                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <button type="submit">Authenticate Session</button>
+                <div id="login-error"></div>
+            </form>
+        </div>
+    </div>
+
     <div class="max-w-7xl mx-auto space-y-6">
         
         <!-- Top Institutional Navigation Bar -->
@@ -292,6 +365,33 @@
         let initialPrices = [];
         let verifiedUserBalance = 0;
 
+        // Login Handler Script
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            errorDiv.textContent = '';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('login-overlay').style.display = 'none';
+                } else {
+                    errorDiv.textContent = data.message;
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Connection error. Please try again.';
+            }
+        });
+
         function showNotification(message) {
             const banner = document.getElementById('notification-banner');
             document.getElementById('notif-text').textContent = message;
@@ -516,55 +616,6 @@
         }
 
         fetchPortfolio();
-    </script>
-
-    <div id="login-gate" style="position:fixed;inset:0;z-index:99999;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:1rem;">
-        <form id="login-form" style="background:#fff;width:100%;max-width:380px;padding:2rem;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.4);font-family:inherit;">
-            <h2 style="font-size:1.4rem;font-weight:700;margin:0 0 .25rem;">Secure Login</h2>
-            <p style="margin:0 0 1.25rem;color:#64748b;font-size:.9rem;">Sign in to access the dashboard.</p>
-            <label for="login-username" style="font-size:.85rem;font-weight:600;">Username</label>
-            <input id="login-username" type="text" autocomplete="username" required style="display:block;width:100%;margin:.25rem 0 1rem;padding:.6rem .75rem;border:1px solid #cbd5e1;border-radius:8px;">
-            <label for="login-password" style="font-size:.85rem;font-weight:600;">Password</label>
-            <input id="login-password" type="password" autocomplete="current-password" required style="display:block;width:100%;margin:.25rem 0 1rem;padding:.6rem .75rem;border:1px solid #cbd5e1;border-radius:8px;">
-            <div id="login-error" role="alert" style="display:none;margin-bottom:1rem;padding:.6rem .75rem;border-radius:8px;background:#fef2f2;color:#b91c1c;font-size:.85rem;"></div>
-            <button id="login-submit" type="submit" style="width:100%;padding:.7rem;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;cursor:pointer;">Log in</button>
-        </form>
-    </div>
-    <script>
-    (function () {
-        var gate = document.getElementById('login-gate');
-        var form = document.getElementById('login-form');
-        var err = document.getElementById('login-error');
-        var btn = document.getElementById('login-submit');
-        document.body.style.overflow = 'hidden';
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            err.style.display = 'none';
-            btn.disabled = true;
-            fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: document.getElementById('login-username').value,
-                    password: document.getElementById('login-password').value
-                })
-            }).then(function (r) { return r.json(); }).then(function (d) {
-                if (d.success) {
-                    gate.style.display = 'none';
-                    document.body.style.overflow = '';
-                    document.getElementById('login-password').value = '';
-                } else {
-                    // Includes "Account locked for 5 minutes" lockout messages from the server
-                    err.textContent = d.message || 'Login failed.';
-                    err.style.display = 'block';
-                    document.getElementById('login-password').value = '';
-                }
-            }).catch(function () {
-                err.textContent = 'Unable to reach the server. Try again.';
-                err.style.display = 'block';
-            }).finally(function () { btn.disabled = false; });
-        });
-    })();
     </script>
 </body>
 </html>
